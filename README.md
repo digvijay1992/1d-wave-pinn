@@ -11,13 +11,14 @@
 | **Code Size** | ![Code Size](https://img.shields.io/github/languages/code-size/digvijay1992/1d-wave-pinn) |
 | **Open Issues** | ![Issues](https://img.shields.io/github/issues/digvijay1992/1d-wave-pinn) |
 
-[![GitHub stars](https://img.shields.io/github/stars/digvijay1992/1d-wave-pinn?style=social)](https://github.com/digvijay1992/1d-wave-pinn/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/digvijay1992/1d-wave-pinn?style=social)](https://github.com/digvijay1992/1d-wave-pinn/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/digvijay1992/1d-wave-pinn?style=social)](https://github.com/digvijay1992/1d-wave-pinn/stargazers)  
+[![GitHub forks](https://img.shields.io/github/forks/digvijay1992/1d-wave-pinn?style=social)](https://github.com/digvijay1992/1d-wave-pinn/network/members)  
 [![GitHub watchers](https://img.shields.io/github/watchers/digvijay1992/1d-wave-pinn?style=social)](https://github.com/digvijay1992/1d-wave-pinn/watchers)
 
 > A Physics-Informed Neural Network (PINN) solver for the **1D wave equation** using Julia's SciML stack, including analytic reference solution, error metrics, rich visualizations, and GIF animations.
 
 ## 📌 Table of Contents
+
 - [1D Wave Equation with Physics-Informed Neural Networks (PINNs)](#1d-wave-equation-with-physics-informed-neural-networks-pinns)
   - [📊 Status Badges](#-status-badges)
   - [📌 Table of Contents](#-table-of-contents)
@@ -26,8 +27,8 @@
     - [Wave Equation](#wave-equation)
     - [Boundary and Initial Conditions](#boundary-and-initial-conditions)
     - [Analytical Fourier Series Solution](#analytical-fourier-series-solution)
-  - [🧠 PINN Architecture \& Discretization](#-pinn-architecture--discretization)
-  - [📊 Error Metrics \& Diagnostics](#-error-metrics--diagnostics)
+  - [🧠 PINN Architecture & Discretization](#-pinn-architecture--discretization)
+  - [📊 Error Metrics & Diagnostics](#-error-metrics--diagnostics)
   - [📈 Visualization](#-visualization)
     - [Example Figures](#example-figures)
   - [🛠️ Installation](#️-installation)
@@ -36,7 +37,7 @@
   - [🚀 Usage](#-usage)
   - [📊 Parameters](#-parameters)
     - [Physical and Numerical Parameters](#physical-and-numerical-parameters)
-    - [PINN \& Training Hyperparameters](#pinn--training-hyperparameters)
+    - [PINN & Training Hyperparameters](#pinn--training-hyperparameters)
   - [📚 Theoretical Background](#-theoretical-background)
   - [📄 License](#-license)
   - [👤 Author](#-author)
@@ -45,7 +46,7 @@
 
 This repository implements a **Physics-Informed Neural Network** for the classical **1D wave equation** on a unit spatial domain and finite time interval. The PINN is trained against the governing PDE and boundary/initial conditions, then compared to an **analytical Fourier-series solution** for quantitative error assessment.
 
-![Loss history](loss_history.gif)
+![Loss history](loss_history.gif)  
 ![Heatmap PINN vs True](heatmap_pinn_vs_true.gif)
 
 The project demonstrates a full workflow for PINNs in Julia:
@@ -55,61 +56,62 @@ The project demonstrates a full workflow for PINNs in Julia:
 - Training with **Adam → BFGS** using the **Optimization** ecosystem.
 - Evaluation, error metrics, static plots, and **GIF animations** for both solution fields and loss history.
 
-
-
 ## 🧮 PDE Problem Setup
 
 ### Wave Equation
 
-We solve the 1D wave equation on \(x \in [0,1]\), \(t \in [0,T]\):
+We solve the 1D wave equation on $x \in [0,1]$, $t \in [0,T]$:
 
-\[
+$$
 u_{tt}(x,t) = c^2\,u_{xx}(x,t)
-\]
+$$
 
-with constant wave speed \(c = 1.0\).
+with constant wave speed $c = 1.0$.
 
 ### Boundary and Initial Conditions
 
 The model uses homogeneous Dirichlet boundaries and smooth initial data:
 
 - Boundary conditions:
-  - \(u(0,t) = 0\)
-  - \(u(1,t) = 0\)
+  - $u(0,t) = 0$
+  - $u(1,t) = 0$
 
 - Initial conditions:
-  - \(u(x,0) = x(1 - x)\)
-  - \(u_t(x,0) = 0\)
+  - $u(x,0) = x(1 - x)$
+  - $u_t(x,0) = 0$
 
-The PINN is trained on a grid-based strategy with spatial step \(dx = 0.1\) over the time interval \(t \in [0,1]\).
+The PINN is trained on a grid-based strategy with spatial step $dx = 0.1$ over the time interval $t \in [0,1]$.
 
 ### Analytical Fourier Series Solution
 
-For the chosen initial displacement \(f(x) = x(1-x)\), the solution admits a Fourier sine series representation:
+For the chosen initial displacement $f(x) = x(1 - x)$, the solution admits a Fourier sine series representation:
 
 - Sine-series coefficients:
-  - \(a_n = 8 / (\pi^3 n^3)\) for odd \(n\)
-  - \(a_n = 0\) for even \(n\)
+  - $a_n = \dfrac{8}{\pi^3 n^3}$ for odd $n$
+  - $a_n = 0$ for even $n$
 
 - Analytical solution:
-  \[
-  u_{\text{true}}(x,t) = \sum_{n=1}^{N} a_n \cos(c n \pi t)\sin(n \pi x),
-  \]
-  evaluated up to \(N = 200\) modes for high accuracy.
 
-The script builds a dense space–time grid and computes the analytical solution \(U_{\text{true}}(x_i,t_j)\) for benchmarking.
+$$
+u_{\text{true}}(x,t) =
+\sum_{n=1}^{N} a_n \cos(c n \pi t)\,\sin(n \pi x),
+$$
+
+evaluated up to $N = 200$ modes for high accuracy.
+
+The script builds a dense space–time grid and computes the analytical solution $U_{\text{true}}(x_i,t_j)$ for benchmarking.
 
 ## 🧠 PINN Architecture & Discretization
 
-The PINN uses a **fully connected neural network** that learns a mapping \((x,t) \mapsto u(x,t)\):
+The PINN uses a **fully connected neural network** that learns a mapping $(x,t) \mapsto u(x,t)$:
 
 - Network architecture (implemented with **Lux**):
 
-  - Input dimension: 2 (x, t).
+  - Input dimension: 2 ($x, t$).
   - Hidden layers: 3.
   - Hidden units: 32 per layer.
   - Activation: `tanh` for all hidden layers.
-  - Output layer: 1 neuron (scalar displacement \(u\)).
+  - Output layer: 1 neuron (scalar displacement $u$).
 
 - Initialization and parameter handling:
 
@@ -148,18 +150,18 @@ After training, the script evaluates the PINN on a uniform grid in space and tim
   - Root-mean-square error (RMSE).
   - Maximum absolute error over the grid.
 
-The script also prints **snapshot errors** at selected times \(t = 0.0, 0.25, 0.5, 0.75, 1.0\), reporting MAE and max error for each time slice.
+The script also prints **snapshot errors** at selected times $t = 0.0, 0.25, 0.5, 0.75, 1.0$, reporting MAE and max error for each time slice.
 
 ## 📈 Visualization
 
 The project produces high-quality static plots and GIF animations for qualitative assessment:
 
 - Static plots:
-  - Initial condition comparison at \(t = 0\): true vs PINN line plot (saved as `initial_condition_comparison.png`).
-  - Final-time profile at \(t = 1.0\): true vs PINN line plot (saved as `finaltime_comparison.png`).
+  - Initial condition comparison at $t = 0$: true vs PINN line plot (saved as `initial_condition_comparison.png`).
+  - Final-time profile at $t = 1.0$: true vs PINN line plot (saved as `finaltime_comparison.png`).
   - Heatmaps:
-    - `true_solution_heatmap.png` for \(U_{\text{true}}(x,t)\).
-    - `pinn_solution_heatmap.png` for \(U_{\text{pinn}}(x,t)\).
+    - `true_solution_heatmap.png` for $U_{\text{true}}(x,t)$.
+    - `pinn_solution_heatmap.png` for $U_{\text{pinn}}(x,t)$.
   - Composite figure `wave_pinn_comparison.png` combining line plots and both heatmaps.
 
 - GIFs:
@@ -171,8 +173,8 @@ These assets make the repository useful both as a **benchmark** and as a **didac
 
 ### Example Figures
 
-![Wave PINN comparison](wave_pinn_comparison.png)
-![Loss history](loss_history.gif)
+![Wave PINN comparison](wave_pinn_comparison.png)  
+![Loss history](loss_history.gif)  
 ![Heatmap PINN vs True](heatmap_pinn_vs_true.gif)
 
 ## 🛠️ Installation
@@ -242,11 +244,11 @@ This will:
 
 | Parameter | Symbol | Default | Description |
 |----------|--------|---------|-------------|
-| Wave speed | \(c\) | 1.0 | Constant propagation speed. |
-| Final time | \(T_{\text{final}}\) | 1.0 | End of simulation interval. |
+| Wave speed | $c$ | 1.0 | Constant propagation speed. |
+| Final time | $T_{\text{final}}$ | 1.0 | End of simulation interval. |
 | Spatial step | `dx` | 0.1 | Grid spacing used for training and evaluation. |
 | Time step | `dt` | 0.02 | Time spacing for evaluation grid. |
-| Fourier modes | `Nfourier` | 200 | Number of modes in analytic series. |
+| Fourier modes | `N_{\text{fourier}}$ | 200 | Number of modes in analytic series. |
 | Random seed | `seed` | 1234 | Ensures reproducible network initialization. |
 
 ### PINN & Training Hyperparameters
@@ -256,8 +258,8 @@ This will:
 | Hidden layers | 3 | Depth of fully connected Lux network. |
 | Hidden units | 32 | Neurons per hidden layer. |
 | Activation | `tanh` | Nonlinearities for all hidden layers. |
-| Output | 1 | Scalar displacement \(u(x,t)\). |
-| Training strategy | `GridTraining(dx)` | Grid-based PINN residual sampling.|
+| Output | 1 | Scalar displacement $u(x,t)$. |
+| Training strategy | `GridTraining(dx)` | Grid-based PINN residual sampling. |
 | Optimizer (phase 1) | Adam | Learning rate 0.001, 4000 iterations. |
 | Optimizer (phase 2) | BFGS | 3000 iterations, initialized from Adam solution. |
 
@@ -265,7 +267,7 @@ This will:
 
 Physics-Informed Neural Networks embed the **governing equations and boundary/initial conditions** directly into the loss function, enabling **data-efficient learning** of solution fields:
 
-- The PDE residual \(u_{tt} - c^2 u_{xx}\) is enforced via automatic differentiation on the network output \(u(x,t)\).
+- The PDE residual $u_{tt} - c^2 u_{xx}$ is enforced via automatic differentiation on the network output $u(x,t)$.
 - Boundary and initial conditions are included as penalty terms at sampled points in space–time.
 - By benchmarking against an exact Fourier-series solution, this example illustrates how PINNs can approximate **smooth, oscillatory wave dynamics** on relatively coarse grids with modest network sizes.
 
