@@ -1,0 +1,74 @@
+name: CI Pipeline - 1D Wave PINN
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['1.10', '1.11']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.version }}
+
+      - name: Cache Julia artifacts and packages
+        uses: julia-actions/cache@v2
+        with:
+          path: |
+            ~/.julia/artifacts
+            ~/.julia/packages
+          key: ${{ runner.os }}-${{ matrix.version }}-${{ hashFiles('**/Project.toml') }}
+
+      - name: Install dependencies
+        run: julia --project=@. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run 1D Wave PINN script
+        run: julia --project=@. 1d_wave_pinn.jl
+        timeout-minutes: 45
+
+      - name: Verify outputs
+        run: |
+          for file in \
+            wave_pinn_comparison.png \
+            initial_condition_comparison.png \
+            finaltime_comparison.png \
+            true_solution_heatmap.png \
+            pinn_solution_heatmap.png \
+            pinn_vs_true.gif \
+            loss_history.gif \
+            heatmap_pinn_vs_true.gif \
+            wave_pinn_simulation.jld2 \
+            wave_pinn_simulation.csv; do
+            if [ -f "$file" ]; then
+              echo "✅ $file generated"
+            else
+              echo "❌ Missing $file"
+              exit 1
+            fi
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 1d-wave-pinn-results-julia-${{ matrix.version }}
+          path: |
+            *.png
+            *.gif
+            *.jld2
+            *.csv
+          retention-days: 7
